@@ -12,10 +12,11 @@ import ContactsUI
 import JFContactsPicker
 
 class ViewController: UIViewController {
-
+    
     @IBOutlet weak var webview: UIWebView!
     var urlString: String = ""
     var baseURL: String = ""
+    var isProduction = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,22 +25,22 @@ class ViewController: UIViewController {
         loadPage()
         
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
+    
+    
 }
 
 extension ViewController: ScanPickerDelegate {
     
     func loadScanView() {
         let result =  self.storyboard?.instantiateViewController(withIdentifier: "ScannerViewController") as! ScannerViewController
-            result.delegate =  self
+        result.delegate =  self
         self.navigationController?.pushViewController(result, animated: true)
-    
+        
     }
     
     func scanPicker(scan: ScannerViewController, didScan: String) {
@@ -118,18 +119,18 @@ extension ViewController: UIWebViewDelegate {
             loadScanView()
             return false
         }
-
+        
         
         return true
     }
 }
 
 extension ViewController {
-
+    
     func loadPage() {
-        baseURL = getBaseURL()
+        baseURL =  getBaseURL()
         let url = NSURL (string: baseURL)
-       loadSpecificURL(urlEncode: url)
+        loadSpecificURL(urlEncode: url)
     }
     
     func redirectToContactPage(name: String, phoneNumber: String) {
@@ -164,16 +165,19 @@ extension ViewController {
     
     private func getBaseURL() -> String {
         
-//        let delegate = UIApplication.shared.delegate as! AppDelegate
-//        
-//        if delegate.webServer.serverURL != nil {
-//            let baseURLString =  delegate.webServer.serverURL.absoluteString
-//            if baseURLString.isEmpty {
-//                return "http://localhost/"
-//            }
-//            
-//               return baseURLString
-//        }
+        if isProduction == false {
+            let delegate = UIApplication.shared.delegate as! AppDelegate
+            if delegate.webServer.serverURL != nil {
+                let baseURLString =  delegate.webServer.serverURL.absoluteString
+                if baseURLString.isEmpty {
+                    return "https://localhost/" + "#!/"
+                }
+                
+                return baseURLString + "#!/"
+            }
+            return "https://localhost/" + "#!/"
+        }
+        
         return "https://bkawk.com/"
     }
 }
