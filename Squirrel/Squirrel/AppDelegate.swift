@@ -55,6 +55,7 @@ extension AppDelegate {
         
         webServer = GCDWebServer()!
         webServer.addGETHandler(forBasePath: "/", directoryPath: webPath, indexFilename: "index.html", cacheAge: 0, allowRangeRequests: true)
+        
         webServer.start()
     }
     

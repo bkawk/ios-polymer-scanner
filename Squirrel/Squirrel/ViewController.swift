@@ -73,14 +73,14 @@ extension ViewController: ContactsPickerDelegate {
     
     func contactPicker(_: ContactsPicker, didSelectContact contact: Contact)
     {
-        print("Contact \(contact.displayName) has been selected")
-        print("Contact \(contact.phoneNumbers.first) has been selected")
         let first =  contact.phoneNumbers.first
         let phoneNumber = (first?.phoneNumber ?? "").urlEncode() ?? ""
         let name =  contact.displayName.urlEncode() ?? ""
         redirectToContactPage(name: name, phoneNumber: phoneNumber)
         
-        dismiss(animated: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.dismiss(animated: true)
+        }
     }
     
     func contactPicker(_: ContactsPicker, didCancel error: NSError)
@@ -127,7 +127,7 @@ extension ViewController: UIWebViewDelegate {
 extension ViewController {
 
     func loadPage() {
-        baseURL = getBaseURL() + "#!/"
+        baseURL = getBaseURL()
         let url = NSURL (string: baseURL)
        loadSpecificURL(urlEncode: url)
     }
@@ -163,17 +163,18 @@ extension ViewController {
     }
     
     private func getBaseURL() -> String {
-        let delegate = UIApplication.shared.delegate as! AppDelegate
         
-        if delegate.webServer.serverURL != nil {
-            let baseURLString =  delegate.webServer.serverURL.absoluteString
-            if baseURLString.isEmpty {
-                return "http://localhost/"
-            }
-            
-               return baseURLString
-        }
-        return "http://localhost/"
+//        let delegate = UIApplication.shared.delegate as! AppDelegate
+//        
+//        if delegate.webServer.serverURL != nil {
+//            let baseURLString =  delegate.webServer.serverURL.absoluteString
+//            if baseURLString.isEmpty {
+//                return "http://localhost/"
+//            }
+//            
+//               return baseURLString
+//        }
+        return "https://bkawk.com/"
     }
 }
 
