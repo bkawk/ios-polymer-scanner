@@ -58,7 +58,6 @@
       .lock img{
         height: 20px;
       }
-
       .contacts{
         display: block;
         position: fixed;
@@ -72,7 +71,6 @@
       .contacts img{
         height: 20px;
       }
-
       poly-eth-balance{
         @apply(--poly-eth-balance)
       }
@@ -88,7 +86,7 @@
       <img src="../assets/icons/mini-send.svg">
     </a>
 
-    <a href="/contacts/balance/" class="contacts">
+    <a href="squirrel://contacts/balance/" class="contacts">
       <img src="../assets/icons/mini-contacts.svg">
     </a>
     
@@ -155,6 +153,7 @@
           this.set('route.path', 'login'); 
         }
       }
+
 
     } window.customElements.define(MyBalance.is, MyBalance);
   </script>

@@ -162,7 +162,7 @@ open class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjec
         if captureSession.isRunning {
             captureSession.stopRunning()
         }
-            self.dismiss(animated: true)
+        self.navigationController?.popViewController(animated: true)
     }
     
     @IBAction func photoPressed(_ sender: Any) {
@@ -177,29 +177,41 @@ extension ScannerViewController: UIImagePickerControllerDelegate, UINavigationCo
         imagePicker.allowsEditing = false
         imagePicker.sourceType = .photoLibrary
         
-        self.navigationController?.pushViewController(imagePicker, animated: true)
+        self.present(imagePicker, animated: true)
     }
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]){
-        var  chosenImage = UIImage()
-        chosenImage = info[UIImagePickerControllerOriginalImage] as! UIImage //2
-        if let string = ScanStaticImage().scan(forQR: chosenImage) {
-               print(string)
-              delegate?.scanPicker(scan: self, didScan: string)
-        } else {
-            let ac = UIAlertController(title: "Scanning", message: "No barcode found", preferredStyle: .alert)
-            ac.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            self.navigationController?.present(ac, animated: true, completion: nil)
+
+        if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
+            let detector:CIDetector=CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy:CIDetectorAccuracyHigh])!
             
-            delegate?.scanPicker(scan: self, didScan: "")
+            let ciImage:CIImage = CIImage(image:pickedImage)!
+            
+            var qrCodeLink = ""
+            
+            let features=detector.features(in: ciImage)
+            
+            for feature in features as! [CIQRCodeFeature] {
+                
+                qrCodeLink += feature.messageString!
+            }
+            
+            print("QR code picked", qrCodeLink)//Your result from QR Code
+            
+            if qrCodeLink.isEmpty == false {
+                self.delegate?.scanPicker(scan: self, didScan: qrCodeLink)
+            }
+            
+            dismiss(animated: true)
+            self.navigationController?.popViewController(animated: true)
         }
-     
-        dismiss(animated:true, completion: nil) //5
+        
+      
     }
     
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController)
     {
-        _ = picker.popViewController(animated: true)
+        dismiss(animated: true)
     }
 
 }
@@ -217,6 +229,7 @@ extension ScannerViewController {
     
     func foundCode(code: String) {
         self.delegate?.scanPicker(scan: self, didScan: code)
+        self.navigationController?.popViewController(animated: true)
     }
 }
 

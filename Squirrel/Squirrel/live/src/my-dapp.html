@@ -7,8 +7,9 @@
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
-
+<link rel="import" href="my-redux.html">
 <link rel="import" href="shared-styles.html">
+
 </head><body><dom-module id="my-dapp">
   <template>
     <style include="shared-styles">
@@ -22,9 +23,9 @@
         background-size: cover;
         background-position: center;*/
       }
-      app-drawer-layout:not([narrow]) [drawer-toggle] {
+      /*app-drawer-layout:not([narrow]) [drawer-toggle] {
         display: none;
-      }
+      }*/
     </style>
 
     <app-location route="{{route}}"></app-location>
@@ -32,9 +33,9 @@
 
     <app-drawer-layout force-narrow="">
       <app-drawer id="drawer" slot="drawer">
-        <!-- Drawer content -->
+        <h1>Draw</h1>
       </app-drawer>
-
+      
       <app-header-layout has-scrolling-region="">
         <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
           <my-loading name="loading"></my-loading>
@@ -58,7 +59,7 @@
   </template>
 
   <script>
-      class MyDapp extends Polymer.Element {
+    class MyDapp extends ReduxMixin(Polymer.Element) {
     
       static get is() { 
         return 'my-dapp'; 
@@ -70,7 +71,7 @@
             type: String,
             reflectToAttribute: true,
             observer: '_pageChanged',
-          },
+          }
         };
       }
 
@@ -89,6 +90,11 @@
       }
 
 
+      ready() {
+        super.ready();
+        this.addEventListener('drawer', e => this._drawer(e));
+      }
+
       _routePageChanged(page) {
         if (page === undefined) {
           return;
@@ -98,18 +104,19 @@
           this.$.drawer.close();
         }
       }
-
       _pageChanged(page) {
         var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
         Polymer.importHref( resolvedPageUrl, null, this._showPage404.bind(this), true);
       }
-
       _showPage404() {
         this.page = 'view404';
       }
-    }
-
-    window.customElements.define(MyDapp.is, MyDapp);
+      _drawer() {
+        console.log("DRAW FIRED")
+        this.$.drawer.toggle();
+      }
+    
+    }  window.customElements.define(MyDapp.is, MyDapp);
   </script>
 </dom-module>
 </body></html>

@@ -14,6 +14,9 @@ import JFContactsPicker
 class ViewController: UIViewController {
 
     @IBOutlet weak var webview: UIWebView!
+    var urlString: String = ""
+    var baseURL: String = ""
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -34,13 +37,12 @@ extension ViewController: ScanPickerDelegate {
     
     func loadScanView() {
         let result =  self.storyboard?.instantiateViewController(withIdentifier: "ScannerViewController") as! ScannerViewController
-
+            result.delegate =  self
         self.navigationController?.pushViewController(result, animated: true)
     
     }
     
     func scanPicker(scan: ScannerViewController, didScan: String) {
-        scan.dismiss(animated: true)
         if (didScan.isEmpty == false) {
             let resultString = didScan.urlEncode() ?? ""
             redirectToScanResult(result: resultString)
@@ -48,8 +50,7 @@ extension ViewController: ScanPickerDelegate {
     }
     
     func scanPicker(scan: ScannerViewController, didScanFetchFailed error: NSError) {
-        scan.dismiss(animated: true)
-        redirectToError()
+        redirectToScanError()
     }
 }
 
@@ -67,7 +68,7 @@ extension ViewController: ContactsPickerDelegate {
     {
         print("Failed with error \(error.description)")
         contact.dismiss(animated: true)
-        redirectToError()
+        redirectToScanError()
     }
     
     func contactPicker(_: ContactsPicker, didSelectContact contact: Contact)
@@ -85,6 +86,7 @@ extension ViewController: ContactsPickerDelegate {
     func contactPicker(_: ContactsPicker, didCancel error: NSError)
     {
         print("User canceled the selection");
+        dismiss(animated: true)
     }
     
     func contactPicker(_: ContactsPicker, didSelectMultipleContacts contacts: [Contact]) {
@@ -98,15 +100,25 @@ extension ViewController: ContactsPickerDelegate {
 extension ViewController: UIWebViewDelegate {
     
     func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebViewNavigationType) -> Bool {
-        
+        print("TYPE: ",navigationType)
         let path = request.url?.absoluteString ?? ""
         print("URL Request: ", path)
-        if path.contains("/contacts/picker") {
+        if path.contains("squirrel://contacts/") {
+            urlString = path.replacingOccurrences(of: "squirrel://contacts/", with: "")
+            urlString = urlString.replacingOccurrences(of: "/", with: "")
+            // call concontacts
+            loadContacts()
+            return false
+        }
+        
+        if path.contains("squirrel://scan/send") {
+            urlString = path.replacingOccurrences(of: "squirrel://scan/", with: "")
+            urlString = urlString.replacingOccurrences(of: "/", with: "")
             // call concontacts
             loadScanView()
             return false
         }
-        
+
         
         return true
     }
@@ -115,33 +127,53 @@ extension ViewController: UIWebViewDelegate {
 extension ViewController {
 
     func loadPage() {
-        let url = NSURL (string: "http://localhost:8080/")
+        baseURL = getBaseURL() + "#!/"
+        let url = NSURL (string: baseURL)
        loadSpecificURL(urlEncode: url)
     }
     
     func redirectToContactPage(name: String, phoneNumber: String) {
-        let urlEncode = "http://localhost:8080/something/\(name)/\(phoneNumber)"
+        let urlEncode = "\(baseURL)\(urlString)/\(name)/\(phoneNumber)/"
         let url = NSURL (string: urlEncode)
-        print(urlEncode)
+        print("URL redirect to", urlEncode)
         loadSpecificURL(urlEncode: url)
     }
     
+    func redirectContactError() {
+        let url = NSURL (string: "\(baseURL)\(urlString)/error")
+        loadSpecificURL(urlEncode: url)
+    }
+    
+    // MARK: Scan
     func redirectToScanResult(result: String) {
-        let urlEncode = "http://localhost:8080/scanresult/\(result))"
+        let urlEncode = "\(baseURL)\(urlString)/\(result)/"
         let url = NSURL (string: urlEncode)
-        print(urlEncode)
+        print("redirectToScanResult", urlEncode)
         loadSpecificURL(urlEncode: url)
     }
-
     
-    func redirectToError() {
-        let url = NSURL (string: "http://localhost:8080/error/something")
+    func redirectToScanError() {
+        let url = NSURL (string: "\(baseURL)\(urlString)/error")
         loadSpecificURL(urlEncode: url)
     }
     
     private func loadSpecificURL(urlEncode: NSURL?) {
         let requestObj = URLRequest(url: urlEncode! as URL)
         webview.loadRequest(requestObj)
+    }
+    
+    private func getBaseURL() -> String {
+        let delegate = UIApplication.shared.delegate as! AppDelegate
+        
+        if delegate.webServer.serverURL != nil {
+            let baseURLString =  delegate.webServer.serverURL.absoluteString
+            if baseURLString.isEmpty {
+                return "http://localhost/"
+            }
+            
+               return baseURLString
+        }
+        return "http://localhost/"
     }
 }
 

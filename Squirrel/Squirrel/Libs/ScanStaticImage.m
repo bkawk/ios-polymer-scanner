@@ -14,9 +14,10 @@
 
 - (NSString *)scanForQR:(UIImage *)image
 {
-    CGImageRef imageToDecode;  // Given a CGImage in which we are looking for barcodes
+//    CGImageRef imageToDecode = image.CGImage; // Given a CGImage in which we are looking for barcodes
+    ZXImage *imageToDecode = [[ZXImage alloc] initWithCGImageRef:[image CGImage]];
     
-    ZXLuminanceSource *source = [[ZXCGImageLuminanceSource alloc] initWithCGImage:imageToDecode];
+    ZXLuminanceSource *source = [[ZXCGImageLuminanceSource alloc] initWithCGImage:imageToDecode.cgimage];
     ZXBinaryBitmap *bitmap = [ZXBinaryBitmap binaryBitmapWithBinarizer:[ZXHybridBinarizer binarizerWithSource:source]];
     
     NSError *error = nil;
@@ -24,6 +25,8 @@
     // There are a number of hints we can give to the reader, including
     // possible formats, allowed lengths, and the string encoding.
     ZXDecodeHints *hints = [ZXDecodeHints hints];
+    hints.tryHarder = YES;
+    hints.pureBarcode = YES;
     
     ZXMultiFormatReader *reader = [ZXMultiFormatReader reader];
     ZXResult *result = [reader decode:bitmap

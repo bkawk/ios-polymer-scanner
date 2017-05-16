@@ -12,6 +12,7 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    var webServer:GCDWebServer!
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
@@ -27,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        
+        self.stopSever()
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
@@ -52,16 +53,16 @@ extension AppDelegate {
         let bundlePath = Bundle.main.resourcePath ?? ""
         let webPath = bundlePath.appendingPathComponent("live")
         
-        let webServer = GCDWebServer()!
-        webServer.addGETHandler(forBasePath: "/", directoryPath: webPath, indexFilename: "index.html", cacheAge: 3600, allowRangeRequests: true)
+        webServer = GCDWebServer()!
+        webServer.addGETHandler(forBasePath: "/", directoryPath: webPath, indexFilename: "index.html", cacheAge: 0, allowRangeRequests: true)
         webServer.start()
-        
     }
     
     func startServer() {
+        webServer.start()
     }
     
     func stopSever() {
-        
+        webServer.stop()
     }
 }
