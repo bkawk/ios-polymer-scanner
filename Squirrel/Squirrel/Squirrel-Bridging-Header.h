@@ -10,6 +10,5 @@
 #define Squirrel_Bridging_Header_h
 
 #import "GCDWebServer.h"
-#import "ScanStaticImage.h"
 
 #endif /* Squirrel_Bridging_Header_h */
