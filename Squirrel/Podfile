@@ -7,7 +7,7 @@ target 'Squirrel' do
 
   # Pods for Squirrel
   pod 'JFContactsPicker', '~> 1.0'
-  pod 'ZXingObjC'
+
   target 'SquirrelTests' do
     inherit! :search_paths
     

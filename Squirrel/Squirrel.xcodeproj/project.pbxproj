@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		5FF4E8EA5F98302F3BB4A22D /* Pods_SquirrelTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 58D8A9E9E71BA4C54C5A6278 /* Pods_SquirrelTests.framework */; };
 		6805711A79B9A9B2C6197CFF /* Pods_Squirrel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 835899610B3BBDD3B04BBF87 /* Pods_Squirrel.framework */; };
-		6C1E842B1EC99F7200086A29 /* ScanStaticImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 6C1E842A1EC99F7200086A29 /* ScanStaticImage.m */; };
 		6C1E842D1EC9A18000086A29 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C1E842C1EC9A18000086A29 /* AVFoundation.framework */; };
 		6C1E842F1EC9A18500086A29 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C1E842E1EC9A18500086A29 /* CoreMedia.framework */; };
 		6C1E84311EC9A18E00086A29 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C1E84301EC9A18E00086A29 /* CoreVideo.framework */; };
@@ -98,8 +97,6 @@
 		08D2971FD3B1E95B1B79656F /* Pods-Squirrel.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Squirrel.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Squirrel/Pods-Squirrel.debug.xcconfig"; sourceTree = "<group>"; };
 		096738240EBE52D67ED3A3A6 /* Pods-SquirrelUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SquirrelUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-SquirrelUITests/Pods-SquirrelUITests.release.xcconfig"; sourceTree = "<group>"; };
 		58D8A9E9E71BA4C54C5A6278 /* Pods_SquirrelTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SquirrelTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		6C1E84291EC99F7200086A29 /* ScanStaticImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScanStaticImage.h; sourceTree = "<group>"; };
-		6C1E842A1EC99F7200086A29 /* ScanStaticImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScanStaticImage.m; sourceTree = "<group>"; };
 		6C1E842C1EC9A18000086A29 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		6C1E842E1EC9A18500086A29 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		6C1E84301EC9A18E00086A29 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
@@ -258,15 +255,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		6C1E84261EC99F3E00086A29 /* ScanHelper */ = {
-			isa = PBXGroup;
-			children = (
-				6C1E84291EC99F7200086A29 /* ScanStaticImage.h */,
-				6C1E842A1EC99F7200086A29 /* ScanStaticImage.m */,
-			);
-			name = ScanHelper;
-			sourceTree = "<group>";
-		};
 		6C95BA9B1EC932E300FD1FE0 = {
 			isa = PBXGroup;
 			children = (
@@ -328,7 +316,6 @@
 		6C95C05D1EC9467E00FD1FE0 /* Libs */ = {
 			isa = PBXGroup;
 			children = (
-				6C1E84261EC99F3E00086A29 /* ScanHelper */,
 				6C95C1031EC959FA00FD1FE0 /* UIColor+Utilities.swift */,
 				6C95C0D21EC9544200FD1FE0 /* GCDWebServer */,
 				6C95C05E1EC946A100FD1FE0 /* Core */,
@@ -889,7 +876,6 @@
 				6C95C0B71EC946A100FD1FE0 /* WebSocket.m in Sources */,
 				6C95C0BF1EC946A100FD1FE0 /* DDAbstractDatabaseLogger.m in Sources */,
 				6C95C1041EC959FA00FD1FE0 /* UIColor+Utilities.swift in Sources */,
-				6C1E842B1EC99F7200086A29 /* ScanStaticImage.m in Sources */,
 				6C95C0FD1EC9544200FD1FE0 /* GCDWebServerFileResponse.m in Sources */,
 				6C95C0F61EC9544200FD1FE0 /* GCDWebServerResponse.m in Sources */,
 				6C95C0A81EC946A100FD1FE0 /* DDNumber.m in Sources */,
