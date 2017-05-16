@@ -1,0 +1,96 @@
+<html><head><link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/poly-eth/poly-eth-join.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-redux.html">
+
+</head><body><dom-module id="my-join">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 0px;
+        height: 100vh;
+        @apply(--layout-vertical);
+      }
+      .password{
+        padding: 18px;
+        min-height: 180px;
+        width: calc(100% -18px);
+      }
+      .password poly-eth-join{
+        @apply(--login-join-inputs)
+      }
+    </style>
+    <app-location route="{{route}}"></app-location>
+    <div class="title">Create an account</div>
+    <div class="spacer"></div>
+    <div class="password">
+      <poly-eth-join id="eth" confirmed-password="{{confirmedPassword}}">
+      </poly-eth-join>
+    </div>
+    <div class="button" on-click="_save">Save Passphrase</div> 
+    <div class="link" on-click="_restore">
+      <span>Restore</span> an account from backup passphrase.
+    </div>
+
+  </template>
+
+  <script>
+    class MyJoin extends ReduxMixin(Polymer.Element) {
+      static get is() { 
+        return 'my-join'; 
+      }
+      static get properties() {
+        return {
+          confirmedPassword: {
+            type: String,
+            observer: '_setPassword',
+          },
+        };
+      }
+      static get actions() {
+          return Object.assign({
+            PASSWORD: function(password){
+                return { type: 'PASSWORD', password: password}
+            }
+        });
+      }
+      connectedCallback(){
+        super.connectedCallback();
+        this._login()
+      }
+      /**
+      * Update redux when passwords match
+      */
+      _setPassword(){
+        this.dispatch('PASSWORD', this.confirmedPassword);
+      }
+      /**
+      * On click redirect to warning 
+      */
+      _save(){
+        if(this.confirmedPassword){
+          this.$.eth.save();
+          this.set('route.path', 'warning'); 
+        }
+      }
+      /**
+      * On click redirect to restore
+      */
+      _restore(){
+        this.set('route.path', 'restore');
+      }
+      /**
+      * On load redirect to login if vault
+      */
+      _login(){
+        if(localStorage.getItem("vault")){
+          this.set('route.path', 'login');
+        }
+      }
+
+    }    window.customElements.define(MyJoin.is, MyJoin);
+  </script>
+</dom-module>
+</body></html>

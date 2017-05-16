@@ -1,0 +1,30 @@
+<html><head><link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+</head><body><dom-module id="my-contacts">
+<template>
+    <style include="shared-styles">
+    :host {
+        display: block;
+        padding: 10px;
+        background-color: lime;
+        height: 100vh;
+    }
+    </style>
+    <p>This page will never be seen, instead the user will see the native contacts picker</p>
+</template>
+
+<script>
+    class MyContacts extends Polymer.Element {
+    static get is() { return 'my-contacts'; }
+
+    static get properties() {
+        return {
+        
+        };
+    }
+
+} window.customElements.define(MyContacts.is, MyContacts);
+</script>
+</dom-module>
+</body></html>

@@ -1,0 +1,141 @@
+<html><head><link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/poly-eth/poly-eth-restore.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html"><link rel="import" href="shared-styles.html">
+<link rel="import" href="my-redux.html">
+
+</head><body><dom-module id="my-restore">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 0px;
+        height: 100vh;
+        @apply(--layout-vertical);
+      }
+      .passphrase{
+        padding: 18px;
+        min-height: 180px;
+        width: calc(100% -18px);
+      }
+      .passphrase poly-eth-restore{
+        @apply(--login-join-inputs)
+      }
+      .spacer{
+        width: calc(100% -18px);
+        margin: 18px;
+        @apply(--layout-flex);
+      }
+      .scan{
+        padding: 18px 18px 28px 18px;
+        width: 100%;
+        font-size: 11px;
+        color: var(--white-color);
+        font-weight: 400;
+      }
+      .scan span{
+        cursor: pointer;
+        padding: 8px;
+        background-color: var(--light-grey-color);
+        color: var(--black-color);
+        margin-right: 10px;
+        font-weight: 300;
+      }
+      .close{
+        display: block;
+        position: fixed;
+        top: 0px;
+        right: 0px;
+        padding: 18px;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+      .close img{
+        height: 18px;
+      }
+      .error{
+        margin: 18px;
+        color: var(--white-color)
+      }
+    </style>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="/restore/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+
+    <div class="title">Restore passphrase</div>
+    <div class="spacer"></div>
+    <template is="dom-if" if="{{error}}">
+      <div class="error">You did not allow access to the camera, please go to settings to allow this app to access the camera or manually enter the address below</div>
+    </template>
+    <div class="passphrase">
+      <poly-eth-restore passphrase="{{scannedPhrase}}" confirmed-password="{{confirmedPassword}}">
+      </poly-eth-restore>
+    </div>
+    <div class="button" on-click="_warning">Restore and Save</div> 
+    <div class="scan" on-click="_scan">
+      <span>Scan</span> QR code with passphrase
+    </div>
+
+    <a href="/login/" class="close">
+      <img src="/assets/icons/mini-close.svg">
+    </a>
+
+
+
+  </template>
+
+  <script>
+    class MyRestore extends ReduxMixin(Polymer.Element) {
+      static get is() { return 'my-restore'; }
+    
+      static get properties() {
+        return {
+          confirmedPassword: {
+            type: String,
+            observer: '_setPassword',
+          },
+          routeData:{
+            type: Object,
+            observer: "_error"
+          },
+          error: {
+            type: Boolean,
+            value: false
+          },
+          scannedPhrase: {
+            type: String,
+          }
+        };
+      }
+
+      static get actions() {
+          return Object.assign({
+            PASSWORD: function(password){
+                return { type: 'PASSWORD', password: password}
+            }
+        });
+      }
+
+      _setPassword(){
+        this.dispatch('PASSWORD', this.confirmedPassword);
+        this.set('route.path', 'warning'); 
+      }
+      _scan(){
+        this.set('route.path', '/scan/restore/'); 
+      }
+      /**
+      * Set address or show error based on data from scan return
+      */
+      _error(){
+        if(this.routeData.page == 'error'){
+          this.error = true
+        } else {
+          this.scannedPhrase = this.routeData.page
+        }
+      }
+    
+    } window.customElements.define(MyRestore.is, MyRestore);
+  </script>
+</dom-module>
+</body></html>

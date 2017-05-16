@@ -1,0 +1,120 @@
+<html><head><link rel="import" href="../polymer/polymer-element.html">
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
+
+<link rel="import" href="poly-eth.html">
+
+<!--
+`poly-eth-passphrase`
+
+@demo demo/join.html
+-->
+
+</head><body><dom-module id="poly-eth-balance">
+<template>
+    <style>
+    :host {
+        display: block;
+        text-align: center;
+    }
+    .ether-value {
+        font-size: var(--poly-eth-ether-value-size);
+        font-weight: var(--poly-eth-ether-value-weight);
+        color: var(--poly-eth-ether-value-color)
+    }
+    .ether-code {
+        font-size: var(--poly-eth-ether-code-size);
+        font-weight: var(--poly-eth-ether-cide-weight);
+        color: var(--poly-eth-ether-code-color)
+    }
+    .fiat-value {
+        font-size: var(--poly-eth-fiat-value-size);
+        font-weight: var(--poly-eth-fiat-value-weight);
+        color: var(--poly-eth-fiat-value-color)
+    }
+    .fiat-code {
+        font-size: var(--poly-eth-fiat-code-size);
+        font-weight: var(--poly-eth-fiat-code-weight);
+        color: var(--poly-eth-fiat-code-color)
+    }
+    </style>
+    <poly-eth id="eth"></poly-eth>
+    <template is="dom-if" if="{{show}}">
+            <div>
+                <div class="ether-value">{{ether}} <span class="ether-code">ETH</span></div>    
+            </div>
+            <div>
+                <div class="fiat-value">{{fiat}} <span class="fiat-code">{{currencyCode}}</span></div>
+            </div>
+    </template>
+</template>
+
+<script>
+    class PolyEthBalance extends Polymer.Element {
+    
+    static get is() { 
+        return 'poly-eth-balance'; 
+    }
+
+    static get properties() {
+        return {
+            show:{
+                type: Boolean,
+                value: false
+            },
+            address:{
+                type: String,
+                observer: '_address'
+            },
+            currencyCode:{
+                type: String,
+                observer: '_address'
+            },
+            ether:{
+                type: Number,
+                notify: true
+            },
+            fiat:{
+                type: Number,
+                notify: true
+            },
+            interval:{
+                type: Number,
+                value: 3000
+            }
+        };
+    }
+
+    connectedCallback(){
+        super.connectedCallback();
+        if(localStorage.getItem("balance")){
+            this.ether = JSON.parse(localStorage.getItem("balance")).ether
+            this.fiat = JSON.parse(localStorage.getItem("balance")).fiat
+        } else {
+            localStorage.setItem("balance", JSON.stringify({"ether": 0, "fiat": 0, "currencyCode": "USD"}));
+        }
+        setInterval(()=>{ 
+            if(this.address && this.currencyCode){
+                this._address()
+            }
+        }, this.interval);
+    }
+
+    _address(){
+        if(this.address != undefined && this.currencyCode != undefined){
+            this.$.eth.addressBalance(this.address, this.currencyCode)
+            .then((data) => {
+                this.ether = (data.ether.toFixed(8)*1).toString();
+                this.fiat = data.currencyValue.toFixed(2);
+                localStorage.setItem("balance", JSON.stringify({"ether": this.ether, "fiat": this.fiat, "currencyCode": this.currencyCode}));
+            })
+            .catch((err) => {
+                reject(Error(err))
+            })
+        }
+    }
+
+    } window.customElements.define(PolyEthBalance.is, PolyEthBalance);
+</script>
+</dom-module>
+</body></html>

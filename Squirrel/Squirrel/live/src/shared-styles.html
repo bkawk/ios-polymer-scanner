@@ -1,0 +1,104 @@
+<html><head><link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+</head><body><dom-module id="shared-styles">
+  <template>
+    <style>
+    :host {
+      --black-color: #000;
+      --neon-pink-color: #da2053;
+      --dark-pink-color: #e35d84;
+      --light-pink-color: #ff9fbb;
+      --white-color: #fff;
+      --light-grey-color: #B3B3B3;
+      --dark-grey-color: #4D4D4D;
+
+
+
+      --login-join-inputs: {
+        --poly-eth-error-size: 11px;
+        --poly-eth-error-color: var(--white-color);
+        --poly-eth-font-size: 16px;
+        --poly-eth-password-font-size: 38px;
+        --poly-eth-color: var(--white-color);
+        --poly-eth-input-color: var(--white-color);
+        --poly-eth-focus-color: var(--white-color);
+        --poly-eth-undrline-thickness: 1px;
+        --poly-eth-undrline-color: var(--light-grey-color);
+        --poly-eth-undrline-focus-color: var(--white-color);
+      }
+      
+      --passphrase-text:{
+        --poly-eth-passphrase-size: 17px;
+        --poly-eth-passphrase-color: var(--white-color);
+      }
+
+      --poly-eth-balance:{
+        --poly-eth-ether-value-size: 36px;
+        --poly-eth-ether-value-weight: 300;
+        --poly-eth-ether-value-color: var(--light-pink-color);
+        --poly-eth-ether-code-size: 32px;
+        --poly-eth-ether-code-weight: 900;
+        --poly-eth-ether-code-color: var(--dark-pink-color);
+        --poly-eth-fiat-value-size: 12px;
+        --poly-eth-fiat-value-weight: 300;
+        --poly-eth-fiat-value-color: var(--black-color);
+        --poly-eth-fiat-code-size: 8px;
+        --poly-eth-fiat-code-weight: 900;
+        --poly-eth-fiat-code-color: var(--black-color);
+      }
+      
+    --info-box:{
+        text-align: center;
+        padding: 0 50px 0 50px;
+        margin-bottom: 0px;
+        font-size: 13px;
+        color: var(--white-color)
+      }
+    }
+    .title{
+      padding:18px;
+      width:calc(100% -18px);
+      font-size:26px;
+      font-weight:700;
+      color:var(--white-color)
+    }
+
+    .spacer{
+      width:calc(100% -18px);
+      @apply(--layout-flex);
+    }
+
+    .button{
+      cursor:pointer;
+      font-size:16px;
+      margin:18px;
+      padding-top:20px;
+      padding-bottom:20px;
+      width:calc(100% -18px);
+      text-align:center;
+      color:var(--white-color);
+      background-color:var(--dark-grey-color);
+      font-weight:600
+    }
+
+    .link{
+      padding:18px 18px 28px;
+      width:100%;
+      font-size:11px;
+      color:var(--white-color);
+      font-weight:400
+    }
+
+    .link span{
+      cursor:pointer;
+      padding:8px;
+      background-color:var(--light-grey-color);
+      color:var(--black-color);
+      margin-right:10px;
+      font-weight:300
+    }
+
+    </style>
+  </template>
+</dom-module>
+</body></html>

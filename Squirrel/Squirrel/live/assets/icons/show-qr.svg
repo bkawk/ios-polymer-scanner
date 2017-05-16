@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="41px" height="20px" viewBox="0 0 41 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->
+    <title>Group</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="iPhone-SE" transform="translate(-26.000000, -402.000000)" fill-rule="nonzero">
+            <g id="show-qr" transform="translate(26.000000, 401.466191)">
+                <g id="Group" transform="translate(0.471821, 0.231426)">
+                    <rect id="Rectangle-path" fill="#E25D85" x="5.57731318" y="6.18664478" width="7.73683948" height="7.90125464"></rect>
+                    <path d="M0.061084162,19.7213588 L18.8289186,19.7213588 L18.8289186,0.555928678 L0.061084162,0.555928678 L0.061084162,19.7213588 Z M2.98050475,3.53497034 L15.9146188,3.53497034 L15.9146188,16.7419514 L2.98050475,16.7419514 L2.98050475,3.53497034 Z" id="Shape" fill="#EB91AC"></path>
+                    <rect id="Rectangle-path" fill="#E25D85" x="36.817107" y="15.704618" width="3.30677465" height="4.01674087"></rect>
+                    <polygon id="Shape" fill="#EB91AC" points="40.1238816 8.25692237 40.1238816 0.640422339 30.6108464 0.640422339 30.6108464 3.77839255 34.6623357 3.77839255 34.6623357 6.91142482 30.6108464 6.91142482 30.6108464 12.0501757 27.0509565 12.0501757 27.0509565 8.25692237 23.0786571 8.25692237 23.0786571 12.0501757 25.7252107 12.0501757 25.7252107 15.704618 21.2567397 15.704618 21.2567397 19.7213588 30.6108464 19.7213588 30.6108464 15.704618 36.817107 15.704618 36.817107 12.0501757 34.6623357 12.0501757 34.6623357 8.25692237"></polygon>
+                    <rect id="Rectangle-path" fill="#E25D85" x="21.2567397" y="0.642251207" width="7.03546894" height="6.04056523"></rect>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

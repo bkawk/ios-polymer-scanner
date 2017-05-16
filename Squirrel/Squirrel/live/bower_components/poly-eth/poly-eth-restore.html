@@ -1,0 +1,128 @@
+<html><head><link rel="import" href="../polymer/polymer-element.html">
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
+
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-input/paper-textarea.html">
+<link rel="import" href="poly-eth.html">
+
+<!--
+`poly-eth-passphrase`
+
+@demo demo/join.html
+-->
+
+</head><body><dom-module id="poly-eth-restore">
+<template>
+    <style>
+    :host {
+        display: block;
+    }
+    .passphrase {
+        font-size: 10px;
+        color: white;
+        font-weight: 700;
+        padding-bottom: 20px;
+    }
+    .title{
+        font-size: 20px ;
+        color: var(--poly-eth-passphrase-color); 
+    }
+    .container{
+        text-align: center;
+    }
+    .input {
+        --paper-input-container-underline: { border: var(--poly-eth-undrline-thickness) solid var(--poly-eth-undrline-color);}
+        --paper-input-container-input-color: var(--poly-eth-input-color);
+        --paper-input-container-input: { font-size: var(--poly-eth-font-size) }
+        --paper-input-container-color: var(--poly-eth-color);
+        --paper-input-container-focus-color: var(--poly-eth-focus-color);
+    }
+    .password{
+        --paper-input-container-input: { font-size: var(--poly-eth-password-font-size) }
+    }
+    .error {
+        font-size: var(--poly-eth-error-size);
+        color: var(--poly-eth-error-color)
+    }
+    </style>
+    <poly-eth id="eth"></poly-eth>
+    <paper-textarea class="input" label="Passphrase to restore" on-keyup="_passphrase" value="{{passphrase}}"></paper-textarea>
+    <template is="dom-if" if="{{showPassword}}">
+        <paper-input class="input password" label="Strong password" type="password" value="{{password}}" on-keyup="_validate"></paper-input>
+    </template>
+    <template is="dom-if" if="{{showConfirm}}">
+        <paper-input class="input password" label="Confirm password" type="password" value="{{confirm}}" on-keyup="_confirm"></paper-input>
+    </template>
+    <p class="error">{{error}}</p>
+
+</template>
+
+<script>
+    class PolyEthRestore extends Polymer.Element {
+    
+    static get is() { 
+        return 'poly-eth-restore'; 
+    }
+
+    static get properties() {
+        return {
+            confirmedPassword:{
+                type: String,
+                notify: true
+            }
+        };
+    }
+
+    _passphrase(){
+        this.$.eth._checkPassphrase(this.passphrase)
+        .then((data) => {
+            if(data){
+                this.showPassword = true
+            } else {
+                this.showPassword = false
+            }
+        })
+        .catch((err) => {
+            this.error = err[err.length-1]
+            this.showConfirm = false
+        })
+    }
+    _validate(e){
+        this.error = null
+        this.$.eth._strengthTest(this.password)
+        .then((data) => {
+            this.showConfirm = true
+        })
+        .catch((err) => {
+            this.error = err[err.length-1]
+            this.showConfirm = false
+        })
+    }
+
+        _confirm(e){
+        if(this.confirm && this.confirm == this.password){
+            localStorage.clear();
+            this.$.eth.makeAddress(this.password)          
+            .then((data) => {
+                return this.$.eth.getPassphrase(this.password)   
+            })
+            .then((data) => {
+                this.confirmedPassword = this.password
+                this.password = this.confirm = null
+            })
+            .catch((err) => {
+                this.error = err
+            })
+        } else {
+            if(this.confirm && this.confirm.length > 9){
+                this.error = 'The passwords must match exactly'
+            }
+        }
+    }
+
+
+    } window.customElements.define(PolyEthRestore.is, PolyEthRestore);
+</script>
+</dom-module>
+</body></html>

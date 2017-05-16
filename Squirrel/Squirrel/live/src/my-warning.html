@@ -1,0 +1,74 @@
+<html><head><link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-redux.html">
+
+</head><body><dom-module id="my-warning">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 0px;
+        height: 100vh;
+        @apply(--layout-vertical);
+      }
+      .warning{
+        padding: 18px;
+        width: calc(100% -18px);
+        background-image: url('/assets/skull.svg');
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+      }
+      .warning-text{
+        font-size: 11px;
+        padding: 18px;
+        width: calc(100% -18px);
+        text-align: center;
+        color: var( --white-color);
+        font-size: 14px
+      }
+
+    </style>
+
+    <app-location route="{{route}}"></app-location>
+    
+    <div class="title">Warning!</div>
+    <div class="warning spacer"></div>
+    <div class="warning-text">
+        <p>Your backup phrase will be displayed on the next page, ensure you are in private. Anyone who knows your backup phrase has full access to your account!</p>
+    </div>
+    <div class="button" on-click="_save">I Understand</div> 
+
+
+
+  </template>
+
+  <script>
+     class MyWarning extends ReduxMixin(Polymer.Element) {
+      static get is() { 
+        return 'my-warning'; 
+      }
+      static get properties() {
+        return {
+          confirmedPassword: {
+            type: String,
+            statePath: 'password'
+          },
+        };
+      }
+
+      connectedCallback(){
+        super.connectedCallback();
+        if(!this.confirmedPassword){
+          this.set('route.path', 'login/warning/');
+        }
+      }
+      _save(){
+        this.set('route.path', 'phrase'); 
+      }
+
+    } window.customElements.define(MyWarning.is, MyWarning);
+  </script>
+</dom-module>
+</body></html>

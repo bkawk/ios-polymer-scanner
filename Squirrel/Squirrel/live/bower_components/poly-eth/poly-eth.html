@@ -1,0 +1,436 @@
+<html><head><link rel="import" href="../polymer/polymer-element.html">
+<!--<link rel="import" href="../polymer/lib/elements/dom-if.html">-->
+<!--<link rel="import" href="../polymer/lib/elements/dom-repeat.html">-->
+
+<script src="../web3/dist/web3.min.js" async=""></script>
+<script src="../eth-util-browserified/eth-util.min.js" async=""></script>
+
+<!--
+`poly-eth`
+
+@demo demo/index.html
+-->
+
+</head><body><dom-module id="poly-eth">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+  </template>
+
+  <script>
+    class PolyEth extends Polymer.Element {
+      static get is() { return 'poly-eth'; }
+      static get properties() {
+        return {
+          etherScanApi: {
+            type: String
+          },
+          httpProvider: {
+            type: String
+          }
+        };
+      }
+
+    connectedCallback(){
+      super.connectedCallback();
+    }
+    
+    makeAddress(password){
+      return new Promise((resolve, reject) => {   
+        Promise.all([this._checkLocalStorage('isNull'), this._strengthTest(password), this._passphrase()])
+        .then((data) => {
+          return Promise.all([this._makeAddress(data[2]), this._encrypt(data[2], password)])
+        })
+        .then((data) => {
+          resolve(this._saveLocalStorage(data[0], data[1]))
+        })
+        .catch((err) => {
+          reject(err)
+        })
+      })
+    }
+    getPassphrase(password){
+      return new Promise((resolve, reject) => {  
+        Promise.all([this._checkLocalStorage('notNull'), this._strengthTest(password)])
+        .then(() => {
+          resolve(this._decrypt(password)) 
+        })
+        .catch((err) => {
+          reject(err)
+        })
+      })
+    }
+    restoreAddress(passphrase, password){
+      return new Promise((resolve, reject) => {  
+        Promise.all([this._deleteLocalStorage(), this._strengthTest(password)])
+        .then((data) => {
+          return Promise.all([this._makeAddress(passphrase), this._encrypt(passphrase, password)])
+        })
+        .then((data) => {
+          resolve(this._saveLocalStorage(data[0], data[1]))
+        })
+        .catch((err) => {
+          reject(err)
+        })
+      })
+    }
+    changePassword(passphrase, password, newPassword){
+      return new Promise((resolve, reject) => {  
+        Promise.all([this._strengthTest(password), this._strengthTest(newPassword), this._checkLocalStorage('notNull')])
+        .then(() => {
+          return this._decrypt(password)
+        })
+        .then((vaultPassphrase) => {
+          return this._compare(passphrase, vaultPassphrase)
+        })
+        .then(() => {
+          return Promise.all([this._deleteLocalStorage(), this._makeAddress(passphrase), this._encrypt(passphrase, newPassword)])
+        })
+        .then((data) => {
+          resolve(this._saveLocalStorage(data[1], data[2]))
+        })
+        .catch((err) => {
+          reject(err)
+        })
+      })
+    }
+    transferEther(toAddress, amount, password){
+      return new Promise((resolve, reject) => {  
+        var fromAddress, nonce, gasPrice, vaultPassphrase
+        var fromAddress = JSON.parse(localStorage.getItem("vault")).ethAddress
+        Promise.all([this._getEthNonce(fromAddress), this._getGasPrice(), this._getEthAddress()])
+        .then((data) => {
+          nonce = data[0]
+          gasPrice = data[1]
+          fromAddress = data[2]
+          return Promise.all([this._checkLocalStorage('notNull'), this._strengthTest(password)])
+        })
+        .then(() => {
+          return this._decrypt(password)
+        })
+        .then((passphrase) => {
+          vaultPassphrase = passphrase
+          return this._createEthTransation(nonce, toAddress, gasPrice, amount)
+        })
+        .then((rawTx) => {
+          return this._signEthTransaction(rawTx, vaultPassphrase)
+        })
+        .then((signedTx) => {
+          //resolve(this._sendEtherScanTransaction(signedTx))
+          resolve(this._sendEthTransaction(signedTx))
+        })
+        .catch((err) => {
+          reject(err)
+        })
+      })
+    }
+
+    addressBalance(address, currencyCode){
+      return new Promise((resolve, reject) => {
+        this._getEtherScanBallance(address)
+        .then((balance) => {
+          resolve(this._ethFx(balance, currencyCode, 'ETH-X'))
+        })
+        .catch((err) => {
+          reject(Error(err))
+        })
+      })
+    }
+
+
+    _byteLimit(string, maxBytes) {
+      return new Promise((resolve, reject) => {   
+        var byteLength = encodeURI(string).split(/%..|./).length - 1;
+        if(byteLength > maxBytes){
+          reject(Error("The string was longer than maxBytes"))
+        } else {
+          resolve(true)
+        }
+      })
+    }
+    _createEthTransation(nonce, toAddress, gasPrice, amount){
+      return new Promise((resolve, reject) => {  
+        this._gethConnect()
+        if(nonce >=0 && toAddress && gasPrice && amount){    
+          var rawTx = {
+              nonce : this.web3.toHex(nonce),
+              to : toAddress,
+              gasPrice : this.web3.toHex(gasPrice),
+              gasLimit : this.web3.toHex(21000),
+              value : this.web3.toHex(this.web3.toWei(amount, 'ether')),
+              data : "",
+              chainId: 1
+          }
+          resolve(rawTx)
+        } else {
+          reject(Error("A value is missing"))
+        }
+      })
+    }
+    _signEthTransaction(rawTx, vaultPassphrase){
+      return new Promise((resolve, reject) => {
+        var EthereumTx = eth.tx
+        var privateKey = eth.util.sha3(vaultPassphrase)
+        var tx = new EthereumTx(rawTx)
+        tx.sign(privateKey)
+        var serializedTx = tx.serialize()
+        resolve(serializedTx)
+      })
+    }
+    _sendEthTransaction(signedTx){
+      return new Promise((resolve, reject) => {
+        this._gethConnect()
+        this.web3.eth.sendRawTransaction(`0x${signedTx.toString('hex')}`, function(err, hash) {
+          if (!err){
+            resolve(hash)
+          } else {
+            resolve({status: 'error', display: 'Insufficient funds'});
+          }    
+        });
+      })
+    }
+    _getGasPrice(){
+      return new Promise((resolve, reject) => {
+          this._gethConnect()
+          this.web3.eth.getGasPrice((error, gasPrice) => {
+            if(!error){
+              resolve(gasPrice.toString(10))
+            } else {
+              reject(Error("Could not get gas price"))
+            }
+          })
+      })
+    }
+    _getEthNonce(address){
+      return new Promise((resolve, reject) => {
+        this._gethConnect()
+        this.web3.eth.getTransactionCount(address, (error, nonce) => {
+          if(!error){
+            resolve(nonce)
+          } else {
+            reject(Error("Could not get transaction count"))
+          }
+        })
+      })
+    }
+
+    _sendEtherScanTransaction(signedTx){
+      var formatedTx = `0x${signedTx.toString('hex')}`
+      return new Promise((resolve, reject) => {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+            if (xmlhttp.status == 200) {
+              var recipt = JSON.parse(xmlhttp.responseText);
+              if(recipt.error){
+                resolve({status: 'error', display: 'Insufficient funds'});
+              } else {
+                resolve(recipt.result);
+              }
+            } else {
+              reject(Error('No response from Ether Scan'))
+            }
+          }
+        };
+      xmlhttp.open("GET", "https://api.etherscan.io/api?module=proxy&action=eth_sendRawTransaction&hex="+ formatedTx +"&apikey=" + this.etherScanApi);
+      xmlhttp.send();
+      })
+    }
+    _getEtherScanBallance(address){
+      return new Promise((resolve, reject) => {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+            if (xmlhttp.status == 200) {
+              var balance = JSON.parse(xmlhttp.responseText).result;
+              resolve(balance / 1000000000000000000);
+            } else {
+              reject(Error('No response from Ether Scan'))
+            }
+          }
+        };
+      xmlhttp.open("GET", "https://api.etherscan.io/api?module=account&action=balance&address="+ address +"&tag=latest&apikey=" + this.etherScanApi, true);
+      xmlhttp.send();
+      })
+    }
+
+    _getEthBallance(address){
+      return new Promise((resolve, reject) => {
+        this._gethConnect()
+        this.web3.eth.getBalance(address, (error, balance) => {
+          if(!error){
+            resolve(this.web3.fromWei(balance.toString(10))*1)
+          } else {
+            resolve('error')
+          }
+        })
+      })
+    }
+
+
+    _ethFx(amount, currencyCode, direction){
+      return new Promise((resolve, reject) => {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+            if (xmlhttp.status == 200) {
+              var price = JSON.parse(xmlhttp.responseText);
+              var fx
+              switch (currencyCode) {
+                case 'AUD': fx = price.AUD; break;
+                case 'BRL': fx = price.BRL; break;
+                case 'BTC': fx = price.BTC; break;
+                case 'CAD': fx = price.CAD; break;
+                case 'CHF': fx = price.CHF; break;
+                case 'CNY': fx = price.CNY; break;
+                case 'EUR': fx = price.EUR; break;
+                case 'GBP': fx = price.GBP; break;
+                case 'HKD': fx = price.HKD; break;
+                case 'IDR': fx = price.IDR; break;
+                case 'INR': fx = price.INR; break;
+                case 'JPY': fx = price.JPY; break;
+                case 'KRW': fx = price.KRW; break;
+                case 'MXN': fx = price.MXN; break;
+                case 'RUB': fx = price.RUB; break;
+                case 'USD': fx = price.USD;
+              }
+              if(direction == 'X-ETH'){
+                resolve({currencyB: currencyCode, currencyValue: amount, ether: amount / fx})
+              } else {
+                resolve({currencyA: currencyCode, currencyValue: amount * fx, ether: amount})
+              }
+            }
+            else if (xmlhttp.status == 400) {
+              reject(Error("Ajax error 400"))
+            }
+            else {
+              reject(Error("Ajax error not 200"))
+            }
+          }
+        };
+      xmlhttp.open("GET", "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=AUD,BRL,CAD,USD,EUR,CHF,CNY,GBP,BTC,HKD,IDR,INR,JPY,KRW,MXN,RUB", true);
+      xmlhttp.send();
+      })
+    }
+    _compare(thisItem, thatItem){
+      return new Promise((resolve, reject) => {
+        if(thisItem === thatItem){
+          resolve(true)
+        } else {
+          reject(Error("Not equal"))
+        }
+      })
+    }
+    _gethConnect(){
+      return new Promise((resolve, reject) => {
+        if (typeof web3 !== 'undefined') {
+          this.web3 = new Web3(web3.currentProvider);
+        } else {
+          this.web3 = new Web3(new Web3.providers.HttpProvider(this.httpProvider));
+        }
+      })
+    }
+    _makeAddress(passphrase){
+      return new Promise((resolve, reject) => {
+        resolve(`0x${eth.util.privateToAddress(eth.util.sha3(passphrase)).toString('hex')}`)
+      })
+    }
+    _checkPassphrase(mnemonic){
+      return new Promise((resolve, reject) => {
+        if(mnemonic){
+          resolve(eth.bip39.validateMnemonic(mnemonic))
+        } else {
+          reject(Error('No passphrase'))
+        }
+      })
+    }
+    _passphrase(){
+      return new Promise((resolve, reject) => {
+        resolve(eth.bip39.generateMnemonic())
+      })
+    }
+    _strengthTest(password){
+      return new Promise((resolve, reject) => {
+        if(!eth.strength.test(password).strong){
+          reject(eth.strength.test(password).errors)
+        } else {
+          resolve()
+        }
+      })
+    }
+    _checkLocalStorage(val){
+      return new Promise((resolve, reject) => {
+        if(val == 'isNull'){
+          if(localStorage.getItem("vault")){
+            reject(Error("We found a vault"))
+          } else {
+            resolve(true)
+          }
+        }
+        if(val == 'notNull'){
+          if(!localStorage.getItem("vault")){
+            reject(Error("There was no vault"))
+          } else {
+            resolve(true)
+          }
+        }
+      })
+    }
+    _getEthAddress(){
+      return new Promise((resolve, reject) => {
+        resolve(JSON.parse(localStorage.getItem('vault')).ethAddress) 
+      })
+    }
+    _deleteLocalStorage(){
+      return new Promise((resolve, reject) => {
+        if (typeof(Storage) !== "undefined") {
+          localStorage.removeItem('vault');
+          resolve(true)
+        } else {
+          reject(Error("Browser dent suport local storage"))
+        }
+      })
+    }
+    _saveLocalStorage(address, passphrase){
+      return new Promise((resolve, reject) => {
+        if (typeof(Storage) !== "undefined") {
+          localStorage.setItem("vault", JSON.stringify({ "ethAddress": address, "passphrase": passphrase}));
+          resolve(true)
+        } else {
+          reject(Error("Browser dent suport local storage"))
+        }
+      })
+    }
+    _encrypt(passphrase, password){
+      return new Promise((resolve, reject) => {
+        var shaPassword = new Uint8Array(eth.util.sha3(password));
+        var textBytes = eth.aes.utils.utf8.toBytes(passphrase);
+        var aesCtr = new eth.aes.ModeOfOperation.ctr(shaPassword, new eth.aes.Counter(5));
+        var encryptedBytes = aesCtr.encrypt(textBytes);
+        var encryptedHex = eth.aes.utils.hex.fromBytes(encryptedBytes);
+        resolve(encryptedHex);
+      })
+    }
+    _decrypt(password){
+      return new Promise((resolve, reject) => {
+        var shaPassword = new Uint8Array(eth.util.sha3(password));
+        var encryptedHex = JSON.parse(localStorage.getItem("vault")).passphrase;
+        var encryptedBytes = eth.aes.utils.hex.toBytes(encryptedHex);
+        var aesCtr = new eth.aes.ModeOfOperation.ctr(shaPassword, new eth.aes.Counter(5));
+        var decryptedBytes = aesCtr.decrypt(encryptedBytes);
+        var decryptedText = eth.aes.utils.utf8.fromBytes(decryptedBytes);
+        if(eth.bip39.validateMnemonic(decryptedText)){
+          resolve(decryptedText);
+        } else {
+          reject(Error('Invalid Password'))
+        }
+      })
+    }
+
+    } window.customElements.define(PolyEth.is, PolyEth);
+  </script>
+</dom-module>
+</body></html>

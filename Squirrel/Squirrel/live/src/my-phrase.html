@@ -1,0 +1,67 @@
+<html><head><link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/poly-eth/poly-eth-passphrase.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="my-redux.html">
+
+</head><body><dom-module id="my-phrase">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 0px;
+        height: 100vh;
+        @apply(--layout-vertical);
+      }
+
+      poly-eth-passphrase{
+        @apply(--passphrase-text)
+      }
+    </style>
+
+    <app-location route="{{route}}"></app-location>
+
+      <div class="title">Passphrase</div>
+      <div class="spacer"></div>
+      <poly-eth-passphrase confirmed-password="{{confirmedPassword}}" qr-width="270" qr-height="270" dark-color="black">
+      </poly-eth-passphrase>
+      <div class="spacer"></div>
+      <div class="button" on-click="_safe">It's Safe</div> 
+
+  </template>
+
+  <script>
+      class MyPhrase extends ReduxMixin(Polymer.Element) {
+
+      static get is() { 
+        return 'my-phrase'; 
+      }
+      static get properties() {
+        return {
+          confirmedPassword: {
+            type: String,
+            statePath: 'password',
+            observer: '_password'
+          },
+        };
+      }
+    
+      connectedCallback(){
+        super.connectedCallback();
+        localStorage.setItem("passphrase", "You were last shown your passphrase on " + new Date().toLocaleString());
+        this._password();
+      }
+
+      _password(){
+        if(!this.confirmedPassword){
+          this.set('route.path', 'login');
+        }
+      }
+      _safe(){
+        this.set('route.path', 'balance');
+      }
+
+    } window.customElements.define(MyPhrase.is, MyPhrase);
+  </script>
+</dom-module>
+</body></html>
